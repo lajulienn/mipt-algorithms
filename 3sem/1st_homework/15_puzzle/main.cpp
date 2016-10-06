@@ -194,20 +194,19 @@ std::string Astar(Permutation &start, Permutation &finish) {
     Permutation current = start;
     while (queue.size() != 0) {
          current = queue.top();
-        if(current == finish) {
-
+        if(current == finish)
             break;
-        }
         queue.pop();
-        //viewed.insert(current);
         for (auto &v : current.getNeighbours()) {
-            Variables current_var = viewed[current];
+            Variables &current_var = viewed[current];
             int distance = current_var.distance + step_cost;
-            Variables &v_it = viewed[v];
-            if (distance < v_it.distance)  {
-                v_it.parent = &(current);
-                v_it.distance = distance;
-                v_it.f = distance + v.heuristic;
+            if (distance < 0)
+                distance = INT_MAX;
+            Variables &v_var = viewed[v];
+            if (distance < v_var.distance)  {
+                v_var.parent = &(current);
+                v_var.distance = distance;
+                v_var.f = distance + v.heuristic;
                 //if (нет в очереди)
                 queue.push(v);
             }
@@ -216,8 +215,23 @@ std::string Astar(Permutation &start, Permutation &finish) {
     // after we found a solution
     std::string reversed_answer;
     while (!(current == start)) {
-
+        std::pair<int, int> current_pos = GetPosition(0, current.permutation);
+        std::pair<int, int> parent_pos = GetPosition(0, viewed[current].parent->permutation);
+        if (current_pos.first == parent_pos.first) { // the same line
+            if (current_pos.second == parent_pos.second + 1) {
+                reversed_answer.append("R");
+            } else if (current_pos.second == parent_pos.second - 1) {
+                reversed_answer.append("L");
+            }
+        } else { // the same column
+            if (current_pos.first == parent_pos.first + 1) {
+                reversed_answer.append("D");
+            } else if (current_pos.first == parent_pos.first - 1) {
+                reversed_answer.append("U");
+            }
+        }
+        current = *(viewed[current].parent);
     }
 
-    return std::string("Found!\n");
+    return reversed_answer;
 }
