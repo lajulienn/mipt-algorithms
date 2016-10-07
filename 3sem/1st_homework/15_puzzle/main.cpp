@@ -6,20 +6,33 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <set>
 #include <utility>
 #include <vector>
 #include <queue>
 #include <set>
+#include <fstream>
 
 using std::vector;
 
 int CountPermSymbol(const vector<vector<short>> &permutation);
+
 int GetHeuristic(const vector<vector<short>> &permutation);
+
 std::pair<int, int> GetPosition(short element, const vector<vector<short>> &permutation);
+
 bool IsSolvable(const vector<vector<short>> &permutation);
-int ManhattanDistance(const short element, const int from_line, const int from_column, const vector<vector<short>> &permutation);
+
+int ManhattanDistance(const short element, const int from_line, const int from_column,
+                      const vector<vector<short>> &permutation);
+
 std::string PuzzleSolution(const vector<short> &permutation);
+
+template<typename T>
+std::unique_ptr<T> make_unique(T arg) {
+    return std::unique_ptr<T>(new T(arg));
+}
 
 class Permutation {
 public:
@@ -29,23 +42,24 @@ public:
     int heuristic;
 
     bool operator==(const Permutation &p);
+
     bool operator<(const Permutation &p) const;
+
     vector<Permutation> getNeighbours();
 };
+
 bool Permutation::operator<(const Permutation &p) const {
-    for(int i = 0; i < permutation.size(); ++i) {
-        if (permutation[i] >= p.permutation[i])
-            return false;
-    }
-    return true;
+    return permutation < p.permutation;
 }
+
 bool Permutation::operator==(const Permutation &p) {
-    for(int i = 0; i < permutation.size(); ++i) {
+    for (int i = 0; i < permutation.size(); ++i) {
         if (permutation[i] != p.permutation[i])
             return false;
     }
     return true;
 }
+
 vector<Permutation> Permutation::getNeighbours() {
     vector<Permutation> neighbours;
     int size = permutation.size();
@@ -75,6 +89,7 @@ vector<Permutation> Permutation::getNeighbours() {
     }
     return neighbours;
 }
+
 Permutation::Permutation(const vector<vector<short>> &p) {
     permutation = p;
     heuristic = GetHeuristic(permutation);
@@ -82,54 +97,64 @@ Permutation::Permutation(const vector<vector<short>> &p) {
 
 class Variables {
 public:
-    Variables(int distance_ = INT_MAX, int f_ = INT_MAX, Permutation *parent_ = nullptr) :
-            distance(distance_), f(f_), parent(parent_) {}
+    Variables(Permutation *id_ = nullptr, int distance_ = INT_MAX, int f_ = INT_MAX, Permutation *parent_ = nullptr,
+              bool enqueued_ = false) :
+            id(id_), distance(distance_), f(f_), parent(parent_), enqueued(enqueued_) {}
+
+    Permutation *id;
     int distance;
     int f;
     Permutation *parent;
+    bool enqueued;
 };
 
 std::string Astar(Permutation &start, Permutation &finish);
 
 
 int main() {
-    int size = 0;
-    std::cin >> size;
+    int size = 3;
+    //std::cin >> size;
     vector<vector<short>> input;
     input.resize(size);
     for (auto &x : input)
         x.resize(size);
-    for (int line = 0; line < size; ++line) {
-        for (int column = 0; column < size; ++column)
-            std::cin >> input[line][column];
-    }
+    //std::ifstream in("input.txt");
+    freopen("puzzle.in", "r", stdin);
+    auto &in = std::cin;
+    //std::ofstream out("/home/julia/Projects/mipt-algorithms/3sem/1st-homework/15-puzzle/output.txt");
+    freopen("puzzle.out", "w", stdout);
+    auto &out = std::cout;
 
-    if (!IsSolvable(input)){ // check if the permutation is even
-        std::cout << "IMPOSSIBLE\n";
-        return 0;
-    }
+    //for (int i = 0; i < 400; ++i) {
+        for (int line = 0; line < size; ++line) {
+            for (int column = 0; column < size; ++column)
+                in >> input[line][column];
+        }
 
-    vector<vector<short>> solved;
-    solved.resize(size);
-    for (auto &x : solved)
-        x.resize(size);
+        if (!IsSolvable(input)) { // check if the permutation is even
+            out << "-1\n";
+            return 0;
+        }
 
-    for (short i = 0; i < size; ++i) {
-        for (short j = 0; j < size; ++j)
-            solved[i][j] = i * size + j + 1;
-    }
-    solved[size - 1][size - 1] = 0;
+        vector<vector<short>> solved;
+        solved.resize(size);
+        for (auto &x : solved)
+            x.resize(size);
 
-    Permutation start(input);
-    Permutation finish(solved);
+        for (short i = 0; i < size; ++i) {
+            for (short j = 0; j < size; ++j)
+                solved[i][j] = i * size + j + 1;
+        }
+        solved[size - 1][size - 1] = 0;
 
-    std::cout << Astar(start, finish);
+        Permutation start(input);
+        Permutation finish(solved);
+
+        auto answer = Astar(start, finish);
+        out << answer.size() << std::endl << answer << std::endl;
+    //}
 
     return 0;
-}
-
-bool IsSolvable(const vector<vector<short>> &permutation) {
-    return CountPermSymbol(permutation) == 1;
 }
 
 std::pair<int, int> GetPosition(short element, const vector<vector<short>> &permutation) {
@@ -141,24 +166,30 @@ std::pair<int, int> GetPosition(short element, const vector<vector<short>> &perm
     }
 }
 
-int CountPermSymbol(const vector<vector<short>> &permutation) {
+bool IsSolvable(const vector<vector<short>> &permutation) {
     vector<short> permutation_list;
     for (int i = 0; i < permutation.size(); ++i) {
         for (int j = 0; j < permutation.size(); ++j) {
             if (permutation[i][j] != 0)
                 permutation_list.push_back(permutation[i][j]);
-            else
-                permutation_list.push_back(permutation.size() * permutation.size());
         }
     }
-    int symbol = 1;
+
+      int n = 0;
+
     for (int i = 0; i < permutation_list.size(); ++i) {
-        for (int j = 0; j < permutation_list.size(); ++j) {
-            if (j > i && permutation_list[i] > permutation_list[j])
-                symbol *= -1;
-        }
+        //if (permutation_list[i] != 0) {
+            for (int j = 0; j < i; ++j) {
+                if (permutation_list[j] > permutation_list[i]) {
+                    ++n;
+                    //std::cout << permutation_list[j] << " > " << permutation_list[i] << ", n = " << n << std::endl;
+                }
+            }
+        //}
     }
-    return symbol;
+    //n += permutation.size() - GetPosition(0, permutation).first - 1;
+    //std::cout <<"final n = " << n << "\n";
+    return !(n % 2);
 }
 
 int ManhattanDistance(const short element, const int from_line, const int from_column, const int size) {
@@ -174,49 +205,72 @@ int GetHeuristic(const vector<vector<short>> &permutation) {
         for (int j = 0; j < permutation.size(); ++j) {
             if (permutation[i][j] == 0 || permutation[i][j] == i + j)
                 continue;
-            heuristic += ManhattanDistance(permutation[i][j], i, j, permutation.size());
+            heuristic += ManhattanDistance(permutation[i][j] - 1, i, j, permutation.size());
         }
     }
+    return heuristic;
 }
 
 std::string Astar(Permutation &start, Permutation &finish) {
     const int step_cost = 1;
 
+    std::vector<std::unique_ptr<Permutation>> all_permutations;
+
     std::map<Permutation, Variables> viewed;
 
-    auto queue_comparator = [&viewed](const Permutation &a, const Permutation &b) {
-        return viewed[a].f > viewed[b].f;
+    auto queue_comparator = [&viewed](Permutation *a, Permutation *b) {
+        return viewed[*a].f > viewed[*b].f;
     };
-    std::priority_queue<Permutation, std::vector<Permutation>, decltype(queue_comparator)> queue(queue_comparator);
+    std::set<Permutation *> queue;
+    //std::priority_queue<Permutation *, std::vector<Permutation *>, decltype(queue_comparator)> queue(queue_comparator);
 
-    viewed.insert(std::make_pair(start, Variables()));
-    queue.push(start);
-    Permutation current = start;
+    all_permutations.push_back(std::move(make_unique<Permutation>(start)));
+    Permutation *start_ptr = all_permutations.back().get(); // changed on back
+    viewed[start] = Variables(start_ptr, 0, 0 + start.heuristic);
+    queue.insert(start_ptr);
+    Permutation *current = start_ptr;
+    uint64_t step_count = 0;
     while (queue.size() != 0) {
-         current = queue.top();
-        if(current == finish)
+        current = *queue.begin();
+        for (auto st : queue) {
+            if (viewed[*st].f < viewed[*current].f)
+                current = st;
+        }
+        if (*current == finish)
             break;
-        queue.pop();
-        for (auto &v : current.getNeighbours()) {
-            Variables &current_var = viewed[current];
+        queue.erase(current);
+        ++step_count;
+        Variables &current_var = viewed[*current];
+        current_var.enqueued = false;
+        //if (step_count < 100)
+        // std::cout << current->heuristic << ' ' << current_var.distance << std::endl;
+        for (auto &neighbour : current->getNeighbours()) {
             int distance = current_var.distance + step_cost;
-            if (distance < 0)
-                distance = INT_MAX;
-            Variables &v_var = viewed[v];
-            if (distance < v_var.distance)  {
-                v_var.parent = &(current);
-                v_var.distance = distance;
-                v_var.f = distance + v.heuristic;
-                //if (нет в очереди)
-                queue.push(v);
+            auto it = viewed.find(neighbour);
+            if (it == viewed.end()) {
+                all_permutations.push_back(make_unique<Permutation>(neighbour));
+                viewed[neighbour] = Variables(all_permutations.back().get(), distance, distance + neighbour.heuristic,
+                                              current, true);
+                queue.insert(all_permutations.back().get());
+            } else {
+                Variables &neighbour_var = viewed[neighbour];
+                if (distance < neighbour_var.distance) {
+                    neighbour_var.parent = current; // changed start_ptr --> current
+                    neighbour_var.distance = distance;
+                    neighbour_var.f = distance + neighbour.heuristic;
+                    //if (!neighbour_var.enqueued) {
+                    queue.insert(neighbour_var.id);
+                    neighbour_var.enqueued = true;
+                    //}
+                }
             }
         }
     }
     // after we found a solution
     std::string reversed_answer;
-    while (!(current == start)) {
-        std::pair<int, int> current_pos = GetPosition(0, current.permutation);
-        std::pair<int, int> parent_pos = GetPosition(0, viewed[current].parent->permutation);
+    while (!(*current == start)) {
+        std::pair<int, int> current_pos = GetPosition(0, current->permutation);
+        std::pair<int, int> parent_pos = GetPosition(0, viewed[*current].parent->permutation);
         if (current_pos.first == parent_pos.first) { // the same line
             if (current_pos.second == parent_pos.second + 1) {
                 reversed_answer.append("R");
@@ -230,8 +284,8 @@ std::string Astar(Permutation &start, Permutation &finish) {
                 reversed_answer.append("U");
             }
         }
-        current = *(viewed[current].parent);
+        current = viewed[*current].parent;
     }
-
+    std::reverse(reversed_answer.begin(), reversed_answer.end());
     return reversed_answer;
 }
