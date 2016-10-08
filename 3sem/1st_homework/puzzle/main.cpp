@@ -11,7 +11,6 @@
 #include <fstream>
 
 #include "permutation.h"
-#include "puzzle.h"
 #include "astar.h"
 
 
@@ -35,8 +34,9 @@ int main() {
             in >> input[line][column];
     }
 
+    Permutation start(input);
 
-    if (!IsSolvable(input)) { // check if the permutation is even
+    if (!start.IsSolvable()) { // check if the permutation is even
         out << "-1\n";
         return 0;
     }
@@ -52,7 +52,6 @@ int main() {
     }
     solved[size - 1][size - 1] = 0;
 
-    Permutation start(input);
     Permutation finish(solved);
 
     auto answer = Astar(start, finish);

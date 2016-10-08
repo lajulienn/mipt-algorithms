@@ -5,9 +5,7 @@
 #include <set>
 #include <algorithm>
 
-#include "puzzle.h"
 #include "permutation.h"
-
 
 std::string Astar(Permutation &start, Permutation &finish) {
     const int step_cost = 1;
@@ -20,7 +18,7 @@ std::string Astar(Permutation &start, Permutation &finish) {
 
     all_permutations.push_back(std::move(std::make_unique<Permutation>(start)));
     Permutation *start_ptr = all_permutations.back().get();
-    viewed[start] = Variables(start_ptr, 0, 0 + start.heuristic);
+    viewed[start] = Variables(start_ptr, 0, 0 + start.getHeuristic());
     queue.insert({viewed[start].f, start_ptr});
     Permutation *current = start_ptr;
     uint64_t step_count = 0;
@@ -33,22 +31,22 @@ std::string Astar(Permutation &start, Permutation &finish) {
         queue.erase({current_f, current});
         Variables &current_var = viewed[*current];
         current_var.enqueued = false;
-        for (auto &neighbour : current->getNeighbours()) {
+        for (auto &neighbour : current->GetNeighbours()) {
             int distance = current_var.distance + step_cost;
             auto it = viewed.find(neighbour);
             if (it == viewed.end()) {
                 all_permutations.push_back(std::make_unique<Permutation>(neighbour));
-                viewed[neighbour] = Variables(all_permutations.back().get(), distance, distance + neighbour.heuristic,
+                viewed[neighbour] = Variables(all_permutations.back().get(), distance, distance + neighbour.getHeuristic(),
                                               current, true);
-                queue.insert({distance + neighbour.heuristic, all_permutations.back().get()});
+                queue.insert({distance + neighbour.getHeuristic(), all_permutations.back().get()});
             } else {
                 Variables &neighbour_var = viewed[neighbour];
                 if (distance < neighbour_var.distance) {
                     neighbour_var.parent = current; // changed start_ptr --> current
                     neighbour_var.distance = distance;
-                    neighbour_var.f = distance + neighbour.heuristic;
+                    neighbour_var.f = distance + neighbour.getHeuristic();
                     //if (!neighbour_var.enqueued) {
-                    queue.insert({distance + neighbour.heuristic, neighbour_var.id});
+                    queue.insert({distance + neighbour.getHeuristic(), neighbour_var.id});
                     neighbour_var.enqueued = true;
                     //}
                 }
@@ -58,8 +56,8 @@ std::string Astar(Permutation &start, Permutation &finish) {
     // after we found a solution
     std::string reversed_answer;
     while (!(*current == start)) {
-        std::pair<int, int> current_pos = GetPosition(0, current->permutation);
-        std::pair<int, int> parent_pos = GetPosition(0, viewed[*current].parent->permutation);
+        std::pair<int, int> current_pos = current->GetPosition(0);
+        std::pair<int, int> parent_pos = viewed[*current].parent->GetPosition(0);
         if (current_pos.first == parent_pos.first) { // the same line
             if (current_pos.second == parent_pos.second + 1) {
                 reversed_answer.append("R");

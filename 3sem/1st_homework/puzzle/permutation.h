@@ -12,11 +12,18 @@ class Permutation {
 public:
     Permutation(const std::vector<std::vector<short> > &p);
 
-    bool operator==(const Permutation &p);
+    bool operator==(const Permutation &p) const;
     bool operator<(const Permutation &p) const;
 
-    std::vector<Permutation> getNeighbours();
+    std::vector<Permutation> GetNeighbours() const;
+    int CountHeuristic() const;
+    std::pair<int, int> GetPosition(short element) const ;
+    bool IsSolvable() const ;
+    int ManhattanDistance(short element, int from_line, int from_column, int size) const;
+    int getHeuristic() const { return heuristic; }
+    void setHeuristic(int h) { heuristic = h; }
 
+private:
     std::vector<std::vector<short>> permutation;
     int heuristic;
 };

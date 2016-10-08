@@ -5,9 +5,8 @@
 #ifndef INC_15_PUZZLE_ASTAR_H_
 #define INC_15_PUZZLE_ASTAR_H_
 
-#include <string>
-
 #include "permutation.h"
+#include <string>
 
 std::string Astar(Permutation &start, Permutation &finish);
 
