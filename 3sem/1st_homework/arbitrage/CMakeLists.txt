@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
-project(1st_homework)
+project(arbitrage)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SOURCE_FILES trade_arbitrage.cpp)
-add_executable(1st_homework ${SOURCE_FILES})
+set(SOURCE_FILES main.cpp arbitrage_search.h arbitrage_search.cpp)
+add_executable(arbitrage ${SOURCE_FILES})
