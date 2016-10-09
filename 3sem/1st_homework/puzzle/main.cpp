@@ -25,6 +25,8 @@ int main() {
     freopen("puzzle.in", "r", stdin);
     auto &in = std::cin;
     //std::ofstream out("/home/julia/Projects/mipt-algorithms/3sem/1st-homework/15-puzzle/output.txt");
+
+
     freopen("puzzle.out", "w", stdout);
     auto &out = std::cout;
 
@@ -54,7 +56,7 @@ int main() {
 
     Permutation finish(solved);
 
-    auto answer = Astar(start, finish);
+    auto answer = GetSolution(start, finish);
     out << answer.size() << std::endl << answer << std::endl;
     //}
 
