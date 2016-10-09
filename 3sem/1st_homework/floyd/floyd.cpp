@@ -1,6 +1,3 @@
-//
-// Created by julia on 09.10.16.
-//
 #include "floyd.h"
 
 void floyd(std::vector<std::vector<int>> &graph) {
