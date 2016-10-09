@@ -25,10 +25,10 @@ public:
     int GetDistance() const { return distance_; }
     void SetDistance(int distance) { distance_ = distance; }
     Permutation *GetParent() const { return parent_; }
-    void setParent(Permutation *parent) {parent_ = parent; }
-    bool isEnqueued() { return enqueued_; }
-    void setEnqueued() { enqueued_ = true; }
-    void setNotEnqueued() { enqueued_ = false; }
+    void SetParent(Permutation *parent) {parent_ = parent; }
+    bool IsEnqueued() { return enqueued_; }
+    void SetEnqueued() { enqueued_ = true; }
+    void SetNotEnqueued() { enqueued_ = false; }
 
 private:
     std::vector<Permutation> GetNeighbours() const;

@@ -137,7 +137,7 @@ std::string Permutation::GetSolution() {
         if (*current == finish)
             break;
         queue.erase({current_f, current});
-        current->setNotEnqueued();
+        current->SetNotEnqueued();
         for (auto &neighbour : current->GetNeighbours()) {
             int distance = current->GetDistance() + step_cost;
             auto it = visited.find(&neighbour);
@@ -145,20 +145,20 @@ std::string Permutation::GetSolution() {
                 all_permutations.push_back(std::make_unique<Permutation>(neighbour));
                 auto neighbour_ptr = all_permutations.back().get();
                 neighbour_ptr->SetDistance(distance);
-                neighbour_ptr->setParent(current);
-                neighbour_ptr->setEnqueued();
+                neighbour_ptr->SetParent(current);
+                neighbour_ptr->SetEnqueued();
 
                 visited.insert(neighbour_ptr);
                 queue.insert({neighbour_ptr->GetHeuristic() + distance, neighbour_ptr});
             } else {
                 if (distance < (*it)->GetDistance()) {
                     Permutation *neighbour_ptr = *it;
-                    if (neighbour.isEnqueued())
+                    if (neighbour.IsEnqueued())
                         queue.erase({neighbour_ptr->GetHeuristic() + neighbour_ptr->GetDistance(), neighbour_ptr});
-                    neighbour_ptr->setParent(current);
+                    neighbour_ptr->SetParent(current);
                     neighbour_ptr->SetDistance(distance);
                     queue.insert({distance + neighbour_ptr->GetHeuristic(), neighbour_ptr});
-                    neighbour_ptr->setEnqueued();
+                    neighbour_ptr->SetEnqueued();
                 }
             }
         }
