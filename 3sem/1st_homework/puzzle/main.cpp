@@ -11,31 +11,21 @@
 #include <fstream>
 
 #include "permutation.h"
-#include "astar.h"
-
 
 int main() {
-    const int size = 3;
     //std::cin >> size;
+    const int size = 3;
+    std::ifstream in("puzzle.in");
+    std::ofstream out("puzzle.out");
+
     std::vector<std::vector<short>> input;
     input.resize(size);
     for (auto &x : input)
         x.resize(size);
-    //std::ifstream in("input.txt");
-    freopen("puzzle.in", "r", stdin);
-    auto &in = std::cin;
-    //std::ofstream out("/home/julia/Projects/mipt-algorithms/3sem/1st-homework/15-puzzle/output.txt");
-
-
-    freopen("puzzle.out", "w", stdout);
-    auto &out = std::cout;
-
-    //for (int i = 0; i < 400; ++i) {
     for (int line = 0; line < size; ++line) {
         for (int column = 0; column < size; ++column)
             in >> input[line][column];
     }
-
     Permutation start(input);
 
     if (!start.IsSolvable()) { // check if the permutation is even
@@ -43,22 +33,8 @@ int main() {
         return 0;
     }
 
-    std::vector<std::vector<short>> solved;
-    solved.resize(size);
-    for (auto &x : solved)
-        x.resize(size);
-
-    for (short i = 0; i < size; ++i) {
-        for (short j = 0; j < size; ++j)
-            solved[i][j] = i * size + j + 1;
-    }
-    solved[size - 1][size - 1] = 0;
-
-    Permutation finish(solved);
-
-    auto answer = GetSolution(start, finish);
+    auto answer = start.GetSolution();
     out << answer.size() << std::endl << answer << std::endl;
-    //}
 
     return 0;
 }
