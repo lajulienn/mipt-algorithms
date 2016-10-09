@@ -1,13 +1,9 @@
 #include <algorithm>
 #include <cmath>
-#include <cstdint>
-#include <cstdio>
 #include <iostream>
-#include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include <queue>
 #include <fstream>
 
 #include "permutation.h"

@@ -1,7 +1,3 @@
-//
-// Created by julia on 08.10.16.
-//
-
 #ifndef INC_15_PERMUTATION_PERMUTATION_H_
 #define INC_15_PERMUTATION_PERMUTATION_H_
 
