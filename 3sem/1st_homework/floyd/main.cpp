@@ -22,15 +22,14 @@ int main() {
         }
     }
 
-    floyd(graph);
+    auto distances = floyd(graph);
 
     for (int i = 0; i < vertex_number; ++i) {
         for (int j = 0; j < vertex_number; ++j) {
-            out << graph[i][j] << " ";
+            out << distances[i][j] << " ";
         }
         out << std::endl;
     }
 
     return 0;
 }
-
