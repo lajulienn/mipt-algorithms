@@ -23,6 +23,7 @@ int main() {
             int capacity;
             std::cin >> from >> to >> capacity;
             network.AddEdge(from - 1, to - 1, capacity);
+            network.AddEdge(to - 1, from - 1, capacity);
         }
 
         std::cout << network.MaxFlowSearch();

@@ -14,7 +14,7 @@ Network::Network(int source, int sink, int vertex_number)
           vertex_number_(vertex_number),
           distance_(std::vector<int>(vertex_number, INT_MAX)),
           first_not_deleted_edge_(std::vector<int>(vertex_number, 0)),
-          adjacency_list_(std::vector<std::vector<Edge>>(vertex_number)) { }
+          adjacency_list_(std::vector<std::vector<Edge>>(vertex_number)) {}
 
 Network::Edge::Edge(int v, int c) : to(v), capacity(c), flow(0) {}
 
@@ -27,16 +27,9 @@ void Network::AddEdge(int from, int to, int capacity) {
                 break;
             }
         }
-        if (exists) {
-            for (auto &edge : adjacency_list_[to]) {
-                if (edge.to == from) {
-                    edge.capacity += capacity;
-                    break;
-                }
-            }
-        } else {
+        if (!exists) {
             adjacency_list_[from].emplace_back(to, capacity);
-            adjacency_list_[to].emplace_back(from, capacity);
+            adjacency_list_[to].emplace_back(from, 0);
         }
 }
 

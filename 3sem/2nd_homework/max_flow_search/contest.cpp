@@ -1,21 +1,17 @@
+
 #include <iostream>
-#include <string>
 #include <vector>
-#include <map>
-#include <string>
-#include <set>
 #include <climits>
 #include <queue>
 
 class Network {
 public:
-    Network(int source, int sink, int vertex_number);
+    Network(int source, int sink, int vertex_number, int edge_number);
     void AddEdge(int from, int to, int capacity);
     int MaxFlowSearch();
-    std::vector<int> MinimalCut();
 private:
     struct Edge {
-        Edge(int v, int c);
+        Edge(int v, int c) : to(v), capacity(c), flow(0) {}
 
         int to;
         int capacity;
@@ -24,53 +20,53 @@ private:
 
     bool Bfs();
     int Dfs(int vertex, int min_path_capacity);
-    void UsualDfs(int vertex, std::vector<bool> &visited);
 
     int source_;
     int sink_;
     int vertex_number_;
+    int edge_number_;
     std::vector<std::vector<Edge>> adjacency_list_;
     std::vector<int> distance_;
     std::vector<int> first_not_deleted_edge_;
 };
 
-struct EmptySpace {
-    EmptySpace() {};
-    EmptySpace(int id) : id(id), comparisons_with_0(0), comparisons_with_1(0) {}
-
-    int id;
-    int comparisons_with_0;
-    int comparisons_with_1;
-    std::vector<int> spaces_compared;
-    char symbol;
-};
-
-int FindDistance(std::string &string, std::string &pattern);
-void BuildNetwork(Network &network, const std::map<int, EmptySpace> &string_spaces,
-                  const std::map<int, EmptySpace> &pattern_spaces, int sink);
 
 int main() {
-    std::string string;
-    std::string pattern;
+    int vertex_quantity;
+    std::cin >> vertex_quantity;
+    //while (vertex_quantity != 0) {
+        int source = 1;
+        int sink;
+        int edge_quantity;
+        //std::cin >> source >> sink >> edge_quantity;
+    std::cin >> edge_quantity;
 
-    std::cin >> string >> pattern;
+        Network network(source - 1, vertex_quantity - 1, vertex_quantity, edge_quantity);
 
-    std::cout << FindDistance(string, pattern) << std::endl;
-    std::cout << string << std::endl;
-    std::cout << pattern << std::endl;
+        for(int i = 0; i < edge_quantity; ++i) {
+            int from;
+            int to;
+            int capacity;
+            std::cin >> from >> to >> capacity;
+            network.AddEdge(from - 1, to - 1, capacity);
+        }
 
+        std::cout << network.MaxFlowSearch();
+
+        //std::cin >>vertex_quantity;
+    //}
+    
     return 0;
 }
 
-Network::Network(int source, int sink, int vertex_number)
+Network::Network(int source, int sink, int vertex_number, int edge_number)
         : source_(source),
           sink_(sink),
           vertex_number_(vertex_number),
+          edge_number_(edge_number),
           distance_(std::vector<int>(vertex_number, INT_MAX)),
           first_not_deleted_edge_(std::vector<int>(vertex_number, 0)),
           adjacency_list_(std::vector<std::vector<Edge>>(vertex_number)) { }
-
-Network::Edge::Edge(int v, int c) : to(v), capacity(c), flow(0) {}
 
 void Network::AddEdge(int from, int to, int capacity) {
         bool exists = false;
@@ -81,16 +77,9 @@ void Network::AddEdge(int from, int to, int capacity) {
                 break;
             }
         }
-        if (exists) {
-            for (auto &edge : adjacency_list_[to]) {
-                if (edge.to == from) {
-                    edge.capacity += capacity;
-                    break;
-                }
-            }
-        } else {
+        if (!exists) {
             adjacency_list_[from].emplace_back(to, capacity);
-            adjacency_list_[to].emplace_back(from, capacity);
+            adjacency_list_[to].emplace_back(from, 0);
         }
 }
 
@@ -103,6 +92,7 @@ bool Network::Bfs() {
     while (!queue.empty()) {
         int vertex = queue.front();
         queue.pop();
+        if (vertex == sink_) break;
         for (auto &edge : adjacency_list_[vertex]) {
             if (edge.flow < edge.capacity && distance_[edge.to] == INT_MAX) {
                 distance_[edge.to] = distance_[vertex] + 1;
@@ -138,103 +128,6 @@ int Network::Dfs(int vertex, int min_path_capacity) {
     }
     return 0;
 }
-int FindDistance(std::string &string, std::string &pattern) {
-    int hamming_distance = 0;
-    std::map<int, EmptySpace> string_spaces; // key is position of ? in a string
-    std::map<int, EmptySpace> pattern_spaces;
-    int id = 1;
-
-    for (int shift = 0; shift < string.length() - pattern.length() + 1; ++shift) {
-        for (int i = 0; i < pattern.length(); ++i) {
-            char s1 = string[i + shift];
-            char s2 = pattern[i];
-            if (s1 != '?' && s2 != '?' && s1 != s2) {
-                ++hamming_distance;
-            } else if (s1 == '?' && s2 != '?') {
-                if (string_spaces.find(i + shift) == string_spaces.end()) {
-                    string_spaces[i + shift] = EmptySpace(id);
-                    ++id;
-                }
-                if (s2 == '0') {
-                    ++string_spaces[i + shift].comparisons_with_0;
-                } else {
-                    ++string_spaces[i + shift].comparisons_with_1;
-                }
-            } else if (s2 == '?' && s1 != '?') {
-                if (pattern_spaces.find(i) == pattern_spaces.end()) {
-                    pattern_spaces[i] = EmptySpace(id);
-                    ++id;
-                }
-                if (s1 == '0') {
-                    ++pattern_spaces[i].comparisons_with_0;
-                } else {
-                    ++pattern_spaces[i].comparisons_with_1;
-                }
-            } else if (s1 == '?' && s2 == '?') {
-                if (string_spaces.find(i + shift) == string_spaces.end()) {
-                    string_spaces[i + shift] = EmptySpace(id);
-                    ++id;
-                }
-                if (pattern_spaces.find(i) == pattern_spaces.end()) {
-                    pattern_spaces[i] = EmptySpace(id);
-                    ++id;
-                }
-                int s2_id = string_spaces[i + shift].id;
-                pattern_spaces[i].spaces_compared.push_back(s2_id);
-            }
-        }
-    }
-    const int source = 0;
-    const int sink = id;
-    Network network(source, sink, id + 1);
-    BuildNetwork(network, string_spaces, pattern_spaces, sink);
-    hamming_distance += network.MaxFlowSearch();
-    std::vector<int> spaces_with_0 = network.MinimalCut();
-    spaces_with_0.erase(spaces_with_0.begin());
-    std::set<int> set_of_spaces_with_0(spaces_with_0.begin(), spaces_with_0.end());
-    for (auto element : string_spaces) {
-        int position = element.first;
-        EmptySpace space = element.second;
-        if (set_of_spaces_with_0.find(space.id) != set_of_spaces_with_0.end()) {
-            string[position] = '0';
-        } else {
-            string[position] = '1';
-        }
-    }
-    for (auto element : pattern_spaces) {
-        int position = element.first;
-        EmptySpace space = element.second;
-        if (set_of_spaces_with_0.find(space.id) != set_of_spaces_with_0.end()) {
-            pattern[position] = '0';
-        } else {
-            pattern[position] = '1';
-        }
-    }
-    return hamming_distance;
-}
-
-void BuildNetwork(Network &network, const std::map<int, EmptySpace> &string_spaces,
-                  const std::map<int, EmptySpace> &pattern_spaces, int sink) {
-    const int source = 0;
-    for (auto element : string_spaces) {
-        EmptySpace space = element.second;
-        network.AddEdge(source, space.id, space.comparisons_with_0);
-        network.AddEdge(space.id, sink, space.comparisons_with_1);
-        for (auto neighbor : space.spaces_compared) {
-            network.AddEdge(space.id, neighbor, 1);
-            network.AddEdge(neighbor, space.id, 1);
-        }
-    }
-    for (auto element : pattern_spaces) {
-        EmptySpace space = element.second;
-        network.AddEdge(source, space.id, space.comparisons_with_0);
-        network.AddEdge(space.id, sink, space.comparisons_with_1);
-        for (auto neighbor : space.spaces_compared) {
-            network.AddEdge(space.id, neighbor, 1);
-            network.AddEdge(neighbor, space.id, 1);
-        }
-    }
-}
 
 int Network::MaxFlowSearch() {
     int max_flow = 0;
@@ -248,26 +141,4 @@ int Network::MaxFlowSearch() {
         }
     }
     return max_flow;
-}
-
-std::vector<int> Network::MinimalCut() {
-    std::vector<bool> visited(vertex_number_, false);
-    UsualDfs(source_, visited);
-
-    std::vector<int> min_cut;
-    for (int i = 0; i < vertex_number_; ++i) {
-        if(visited[i]) {
-            min_cut.push_back(i);
-        }
-    }
-    return min_cut;
-}
-
-void Network::UsualDfs(int vertex, std::vector<bool> &visited) {
-    visited[vertex] = true;
-    for (auto &neighbor : adjacency_list_[vertex]) {
-        if (!visited[neighbor.to] && neighbor.capacity > neighbor.flow) {
-            UsualDfs(neighbor.to, visited);
-        }
-    }
 }

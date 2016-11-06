@@ -56,7 +56,7 @@ int FindDistance(std::string &string, std::string &pattern) {
     for (auto element : string_spaces) {
         int position = element.first;
         EmptySpace space = element.second;
-        if (space.id == source || space.id == sink) {
+        if (space.id == source) {
             continue;
         }
         if (set_of_spaces_with_0.find(space.id) != set_of_spaces_with_0.end()) {
@@ -68,7 +68,7 @@ int FindDistance(std::string &string, std::string &pattern) {
     for (auto element : pattern_spaces) {
         int position = element.first;
         EmptySpace space = element.second;
-        if (space.id == source || space.id == sink) {
+        if (space.id == source) {
             continue;
         }
         if (set_of_spaces_with_0.find(space.id) != set_of_spaces_with_0.end()) {
@@ -86,7 +86,9 @@ void BuildNetwork(Network &network, const std::map<int, EmptySpace> &string_spac
     for (auto element : string_spaces) {
         EmptySpace space = element.second;
         network.AddEdge(source, space.id, space.comparisons_with_0);
+        network.AddEdge(space.id, source, 0);
         network.AddEdge(space.id, sink, space.comparisons_with_1);
+        network.AddEdge(sink, space.id, 0);
         for (auto neighbor : space.spaces_compared) {
             network.AddEdge(space.id, neighbor, 1);
             network.AddEdge(neighbor, space.id, 1);
@@ -95,7 +97,9 @@ void BuildNetwork(Network &network, const std::map<int, EmptySpace> &string_spac
     for (auto element : pattern_spaces) {
         EmptySpace space = element.second;
         network.AddEdge(source, space.id, space.comparisons_with_0);
+        network.AddEdge(space.id, source, 0);
         network.AddEdge(space.id, sink, space.comparisons_with_1);
+        network.AddEdge(sink, space.id, 0);
         for (auto neighbor : space.spaces_compared) {
             network.AddEdge(space.id, neighbor, 1);
             network.AddEdge(neighbor, space.id, 1);
