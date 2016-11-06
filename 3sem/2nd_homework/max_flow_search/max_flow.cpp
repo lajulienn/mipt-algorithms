@@ -105,7 +105,7 @@ std::vector<int> Network::MinimalCut() {
 
     std::vector<int> min_cut;
     for (int i = 0; i < vertex_number_; ++i) {
-        if(visited[i]) {
+        if(visited[i] && i != 0) {
             min_cut.push_back(i);
         }
     }

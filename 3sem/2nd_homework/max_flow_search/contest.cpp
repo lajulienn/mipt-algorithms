@@ -171,6 +171,10 @@ int FindDistance(std::string &string, std::string &pattern) {
                     ++pattern_spaces[i].comparisons_with_1;
                 }
             } else if (s1 == '?' && s2 == '?') {
+                if (string_spaces.find(i + shift) == string_spaces.end()) {
+                    string_spaces[i + shift] = EmptySpace(id);
+                    ++id;
+                }
                 if (pattern_spaces.find(i) == pattern_spaces.end()) {
                     pattern_spaces[i] = EmptySpace(id);
                     ++id;

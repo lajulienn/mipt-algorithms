@@ -33,6 +33,10 @@ int FindDistance(std::string &string, std::string &pattern) {
                     ++pattern_spaces[i].comparisons_with_1;
                 }
             } else if (s1 == '?' && s2 == '?') {
+                if (string_spaces.find(i + shift) == string_spaces.end()) {
+                    string_spaces[i + shift] = EmptySpace(id);
+                    ++id;
+                }
                 if (pattern_spaces.find(i) == pattern_spaces.end()) {
                     pattern_spaces[i] = EmptySpace(id);
                     ++id;
@@ -48,11 +52,13 @@ int FindDistance(std::string &string, std::string &pattern) {
     BuildNetwork(network, string_spaces, pattern_spaces, sink);
     hamming_distance += network.MaxFlowSearch();
     std::vector<int> spaces_with_0 = network.MinimalCut();
-    spaces_with_0.erase(spaces_with_0.begin());
     std::set<int> set_of_spaces_with_0(spaces_with_0.begin(), spaces_with_0.end());
     for (auto element : string_spaces) {
         int position = element.first;
         EmptySpace space = element.second;
+        if (space.id == source || space.id == sink) {
+            continue;
+        }
         if (set_of_spaces_with_0.find(space.id) != set_of_spaces_with_0.end()) {
             string[position] = '0';
         } else {
@@ -62,6 +68,9 @@ int FindDistance(std::string &string, std::string &pattern) {
     for (auto element : pattern_spaces) {
         int position = element.first;
         EmptySpace space = element.second;
+        if (space.id == source || space.id == sink) {
+            continue;
+        }
         if (set_of_spaces_with_0.find(space.id) != set_of_spaces_with_0.end()) {
             pattern[position] = '0';
         } else {
