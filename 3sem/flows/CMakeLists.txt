@@ -3,4 +3,7 @@ project(flows)
 
 add_subdirectory(flow-network)
 
+add_subdirectory(find-max-flow)
+
 add_subdirectory(hamming-distance)
+

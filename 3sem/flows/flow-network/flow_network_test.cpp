@@ -94,4 +94,8 @@ TEST_F(FlowNetworkTest, ExampleMinCut) {
     example_.AddEdge(3, 2, 20);
     example_.MaxFlowSearch();
     EXPECT_EQ(answer, example_.MinimalCut());
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> remotes/origin/hamming-distance
